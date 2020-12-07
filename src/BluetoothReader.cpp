@@ -66,10 +66,5 @@ void BluetoothReader::NofificationsCallback(BLERemoteCharacteristic *pBLERemoteC
     temp = (pData[0] | (pData[1] << 8)) * 0.01;
     humi = pData[2];
     Serial.printf("temp = %.2f : humidity = %.2f \n", temp, humi);
-    /*if(temp > 25){
-        digitalWrite(23,LOW);
-    }else{
-        digitalWrite(23, HIGH);
-    }*/
     pBLERemoteCharacteristic->getRemoteService()->getClient()->disconnect();
 }

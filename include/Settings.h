@@ -14,4 +14,4 @@ private:
     String m_password = "";
     int m_hightTemp = 0;
     int m_lowTemp = 0;
-}
+};
