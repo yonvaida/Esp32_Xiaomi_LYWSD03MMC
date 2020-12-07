@@ -1,17 +1,19 @@
 #pragma once
 #include <Arduino.h>
+#include "SPIFFS.h"
 
 class Settings
 {
 public:
-    Settings() = default;
+    explicit Settings();
     ~Settings() = default;
-    void SaveSettings();
-    void ReadSettings();
+    bool SaveSettings(bool t_override) const;
+    bool ReadSettings();
 
 private:
-    String m_ssid = "";
-    String m_password = "";
-    int m_hightTemp = 0;
-    int m_lowTemp = 0;
+    String m_ssid = "SSID";
+    String m_password = "PASS";
+    int m_hightTemp = 20;
+    int m_lowTemp = 10;
+    void CreateConfigFileIfNotExist();
 };
