@@ -1,0 +1,12 @@
+{
+    "WIFI":
+    {
+        "SSID":"Cuza Voda",
+        "PASS":"moscraciun"
+    },
+    "HOME":
+    {
+        "HighTemp":25,
+        "LowTemp":24
+    }
+}

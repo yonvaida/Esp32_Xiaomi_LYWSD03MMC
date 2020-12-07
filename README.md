@@ -1,0 +1,1 @@
+Esp32_Xiaomi_LYWSD03MMC
