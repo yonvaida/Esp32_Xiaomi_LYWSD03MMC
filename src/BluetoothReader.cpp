@@ -1,4 +1,5 @@
 #include "BluetoothReader.h"
+#include <Settings.h>
 
 BluetoothReader::BluetoothReader(BLEUUID t_uid, std::string t_adress)
 {
@@ -66,5 +67,13 @@ void BluetoothReader::NofificationsCallback(BLERemoteCharacteristic *pBLERemoteC
     temp = (pData[0] | (pData[1] << 8)) * 0.01;
     humi = pData[2];
     Serial.printf("temp = %.2f : humidity = %.2f \n", temp, humi);
+    if(temp > Settings::GetInstance()->GetHighTemp())
+    {
+        digitalWrite(23,LOW);
+    }
+        if(temp < Settings::GetInstance()->GetLowTemp())
+    {
+        digitalWrite(23,HIGH);
+    }
     pBLERemoteCharacteristic->getRemoteService()->getClient()->disconnect();
 }

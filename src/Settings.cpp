@@ -1,6 +1,7 @@
 #include <Settings.h>
 #include <ArduinoJson.h>
 
+Settings* Settings::m_instance = nullptr;
 Settings::Settings()
 {
     CreateConfigFileIfNotExist();
@@ -24,6 +25,8 @@ bool Settings::ReadSettings()
     JsonObject homeObj = settingsObj["HOME"].as<JsonObject>();
     m_hightTemp = homeObj["HighTemp"];
     m_lowTemp = homeObj["LowTemp"];
+    m_readInterval = homeObj["ReadInterval"];
+    m_sensorAddress = homeObj["SensorAddress"].as<String>();
     tmpFile.close();
 
     return true;
@@ -46,6 +49,8 @@ bool Settings::SaveSettings(bool t_override) const
     DynamicJsonDocument home(200);
     home["HighTemp"] = m_hightTemp;
     home["LowTemp"] = m_lowTemp;
+    home["ReadInterval"] = m_readInterval;
+    home["SensorAddress"] = m_sensorAddress;
     settingsJson["HOME"] = home;
 
     serializeJson(settingsJson, tmpFile);
@@ -66,4 +71,13 @@ void Settings::CreateConfigFileIfNotExist()
         Serial.println("Settings file not found");
         SaveSettings(true);
     }
+}
+
+Settings* Settings::GetInstance()
+{
+    if(!m_instance)
+    {
+        m_instance = new Settings;
+    }
+    return m_instance;
 }
