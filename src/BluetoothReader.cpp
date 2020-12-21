@@ -1,14 +1,11 @@
 #include "BluetoothReader.h"
 #include <Settings.h>
 
-BluetoothReader::BluetoothReader(BLEUUID t_uid, std::string t_adress)
+BluetoothReader::BluetoothReader(BLEUUID t_uid, std::string t_adress):
+    m_client(BLEDevice::createClient())
 {
     m_serviceUID = t_uid;
     m_clientAdress = std::move(t_adress);
-    if (!m_client)
-    {
-        m_client = BLEDevice::createClient();
-    }
 }
 
 void BluetoothReader::SetServiceUUID(BLEUUID t_uuid)
@@ -21,12 +18,13 @@ void BluetoothReader::SetAddress(std::string t_adress)
     m_clientAdress = t_adress;
 };
 
-void BluetoothReader::Connect()
+bool BluetoothReader::Connect()
 {
-    if (m_client)
+    if (m_client && m_clientAdress != "")
     {
-        m_client->connect(BLEAddress(m_clientAdress));
+        return m_client->connect(BLEAddress(m_clientAdress));
     }
+    return false;
 }
 
 void BluetoothReader::SetCallback(BLEClientCallbacks *t_callback)
@@ -75,5 +73,6 @@ void BluetoothReader::NofificationsCallback(BLERemoteCharacteristic *pBLERemoteC
     {
         digitalWrite(23,HIGH);
     }
+    Settings::GetInstance()->SetCurrTemp(temp);
     pBLERemoteCharacteristic->getRemoteService()->getClient()->disconnect();
 }

@@ -20,10 +20,13 @@ public:
     void SetLowTemp(double t_lowTemp) { m_lowTemp = t_lowTemp; };
     double GetLowTemp() const { return m_lowTemp; };
 
+    void SetCurrTemp(double t_currentTemperature) { m_currentTemperature = t_currentTemperature; };
+    double GetCurrTemp() const { return m_currentTemperature; };
+
     void SetReadInterval(double t_readInterval) { m_readInterval = t_readInterval; };
     double GetReadInterval() const { return m_readInterval; };
 
-    void SetSensorAddress(const String& t_sensorAddress) { m_sensorAddress = t_sensorAddress; };
+    void SetSensorAddress(const String &t_sensorAddress) { m_sensorAddress = t_sensorAddress; };
     String GetSensorAddress() const { return m_sensorAddress; };
 
 private:
@@ -33,6 +36,7 @@ private:
     String m_sensorAddress = "";
     double m_hightTemp = 20.00;
     double m_lowTemp = 10.00;
+    double m_currentTemperature = 0;
     int m_readInterval = 30;
     static Settings *m_instance;
     void CreateConfigFileIfNotExist();
