@@ -76,7 +76,6 @@ void Task1code(void *pvParameters)
       sensorAddres = Settings::GetInstance()->GetSensorAddress();
       portEXIT_CRITICAL_ISR(&timerMux);
     }
-    Serial.println(bluetoothReading);
     delay(1000);
   }
 }

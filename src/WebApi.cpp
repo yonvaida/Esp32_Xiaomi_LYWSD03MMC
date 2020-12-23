@@ -106,7 +106,6 @@ void WebApi::SubmitForm(AsyncWebServerRequest *request)
         const auto param = request->getParam("sensor_address")->value();
         if (!param.isEmpty())
         {
-            Serial.println(param);
             Settings::GetInstance()->SetSensorAddress(param);
             paramsChanged = 0;
         }
