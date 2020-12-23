@@ -4,6 +4,7 @@
 #include <Button.h>
 #include <TFT_eSPI.h>
 #include <memory>
+#include <RotationAnimation.h>
 // // adjust pressure sensitivity - note works 'backwards'
 #define MINPRESSURE 200
 #define MAXPRESSURE 1000
@@ -25,12 +26,17 @@ class DisplayGraphics
 public:
     DisplayGraphics();
     void DrawCurrentTemp();
+    void DrawBTAddress();
     void CheckTouch();
+    void DrawAnimation(bool t_moving);
+    void DrawBTIcon();
 private:
     TFT_eSPI m_tftDisplay;
     std::unique_ptr<TouchScreen> m_touch;
     std::unique_ptr<Button> m_upButton;
     std::unique_ptr<Button> m_downButton;
+    std::unique_ptr<RotationAnimation> m_animation;
     int m_lastXValue = 0;
     int m_lastYValue = 0;
+    int lastTempValue = -1;
 };

@@ -8,6 +8,9 @@ public:
     static Settings *GetInstance();
     bool SaveSettings(bool t_override) const;
     bool ReadSettings();
+
+    void SetMutex(portMUX_TYPE *t_mutex){m_mutex = t_mutex;};
+
     void SetSSID(const String &t_ssid) { m_ssid = t_ssid; };
     String GetSSID() const { return m_ssid; };
 
@@ -31,6 +34,7 @@ public:
 
 private:
     Settings();
+    portMUX_TYPE* m_mutex = nullptr;
     String m_ssid = "SSID";
     String m_password = "PASS";
     String m_sensorAddress = "";

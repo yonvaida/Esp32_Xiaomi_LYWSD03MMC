@@ -1,54 +1,77 @@
+#include <Arduino.h>
 #include <DisplayGraphics.h>
 #include <Fonts.h>
 #include <Settings.h>
+#include <Defines.h>
+#include <SPIFFS.h>
+#include <FS.h>
 
-DisplayGraphics::DisplayGraphics() 
+DisplayGraphics::DisplayGraphics()
 {
     m_touch = std::unique_ptr<TouchScreen>(new TouchScreen(XP, YP, XM, YM, 300));
     m_tftDisplay.init();
     m_tftDisplay.setRotation(0);
     m_tftDisplay.fillScreen(TFT_BLACK);
-
-    m_tftDisplay.fillRect(110, 0, 100, 100, TFT_BLACK);
-    m_tftDisplay.setTextColor(TFT_GREENYELLOW, TFT_BLACK);
-    m_tftDisplay.setFreeFont(FSS18);
-    m_tftDisplay.drawString(String(Settings::GetInstance()->GetHighTemp(), 1), 140, 50, GFXFF);
- m_upButton = std::unique_ptr<Button>(new Button(&m_tftDisplay, m_touch.get(), 60, 10, 10, 110, 110, 110, 0, 0, "+"));
+    m_animation = std::unique_ptr<RotationAnimation>(new RotationAnimation(&m_tftDisplay, 170, 165, 20));
+    m_tftDisplay.setTextColor(TEXT_COLOR, BACKGROUND);
+    m_tftDisplay.setFreeFont(FSSB18);
+    m_tftDisplay.drawString(String(Settings::GetInstance()->GetHighTemp(), 1), 90, 30, GFXFF);
+    m_upButton = std::unique_ptr<Button>(new Button(&m_tftDisplay, m_touch.get(), 45, 15, 15, 75, 75, 75, 0, -10, "+"));
     m_upButton->SetCallback([&]() {
         auto temp = Settings::GetInstance()->GetHighTemp() + 0.5;
         Settings::GetInstance()->SetHightTemp(temp);
         Settings::GetInstance()->SetLowTemp(temp - 0.5);
         Settings::GetInstance()->SaveSettings(true);
-        m_tftDisplay.fillRect(110, 0, 100, 100, TFT_BLACK);
-        m_tftDisplay.setTextColor(TFT_GREENYELLOW, TFT_BLACK);
-        m_tftDisplay.setFreeFont(FSS18);
-        m_tftDisplay.drawString(String(temp, 1), 140, 50, GFXFF);
+        m_tftDisplay.fillRect(90, 30, 30, 30, BACKGROUND);
+        m_tftDisplay.setTextColor(TEXT_COLOR, BACKGROUND);
+        m_tftDisplay.setFreeFont(FSSB18);
+        m_tftDisplay.drawString(String(temp, 1), 90, 30, GFXFF);
     });
-  m_downButton = std::unique_ptr<Button>(new Button(&m_tftDisplay, m_touch.get(), 10, 130, 60, 230, 110, 130, 0, -45, "-"));
-  m_downButton->SetCallback([&]() {
-      auto temp = Settings::GetInstance()->GetHighTemp() - 0.5;
-      Settings::GetInstance()->SetHightTemp(temp);
-      Settings::GetInstance()->SetLowTemp(temp - 0.5);
-      Settings::GetInstance()->SaveSettings(true);
-      m_tftDisplay.fillRect(110, 0, 100, 100, TFT_BLACK);
-      m_tftDisplay.setTextColor(TFT_GREENYELLOW, TFT_BLACK);
-      m_tftDisplay.setFreeFont(FSS18);
-      m_tftDisplay.drawString(String(temp, 1), 140, 50, GFXFF);
-  });
-  m_tftDisplay.fillRect(110, 110, 100, 100, TFT_BLACK);
-  m_tftDisplay.setTextColor(TFT_GREENYELLOW, TFT_BLACK);
-  m_tftDisplay.setFreeFont(FSS9);
-  m_tftDisplay.drawString("Set T", 150, 20, GFXFF);
-  m_tftDisplay.drawString("Read T", 150, 100, GFXFF);
-
+    m_downButton = std::unique_ptr<Button>(new Button(&m_tftDisplay, m_touch.get(), 195, 75, 165, 15, 225, 15, 0, -30, "-"));
+    m_downButton->SetCallback([&]() {
+        auto temp = Settings::GetInstance()->GetHighTemp() - 0.5;
+        Settings::GetInstance()->SetHightTemp(temp);
+        Settings::GetInstance()->SetLowTemp(temp - 0.5);
+        Settings::GetInstance()->SaveSettings(true);
+        m_tftDisplay.fillRect(90, 30, 30, 30, BACKGROUND);
+        m_tftDisplay.setTextColor(TEXT_COLOR, BACKGROUND);
+        m_tftDisplay.setFreeFont(FSSB18);
+        m_tftDisplay.drawString(String(temp, 1), 90, 30, GFXFF);
+    });
+    m_tftDisplay.setTextColor(TEXT_COLOR, BACKGROUND);
+    m_tftDisplay.setFreeFont(FSS9);
+    m_tftDisplay.drawString("Temp curenta: ", 15, 110);
+    m_tftDisplay.drawString("Status pompa: ", 15, 158);
+    m_tftDisplay.drawString("BT: ", 15, 205);
 }
 
 void DisplayGraphics::DrawCurrentTemp()
 {
-    m_tftDisplay.fillRect(110, 120, 100, 100, TFT_BLACK);
-    m_tftDisplay.setTextColor(TFT_GREENYELLOW, TFT_BLACK);
-    m_tftDisplay.setFreeFont(FSS18);
-    m_tftDisplay.drawString(String(Settings::GetInstance()->GetCurrTemp(), 1), 140, 130, GFXFF);
+    if (lastTempValue != Settings::GetInstance()->GetCurrTemp())
+    {
+        lastTempValue = Settings::GetInstance()->GetCurrTemp();
+        m_tftDisplay.setTextColor(TEXT_COLOR, BACKGROUND);
+        m_tftDisplay.setFreeFont(FSS9);
+        m_tftDisplay.drawString(String(Settings::GetInstance()->GetCurrTemp(), 1), 140, 110, GFXFF);
+    }
+}
+
+void DisplayGraphics::DrawBTAddress()
+{
+    m_tftDisplay.setTextColor(TEXT_COLOR, BACKGROUND);
+    m_tftDisplay.setFreeFont(FSS9);
+    m_tftDisplay.drawString(Settings::GetInstance()->GetSensorAddress(), 50, 205, GFXFF);
+}
+
+void DisplayGraphics::DrawAnimation(bool t_rotation)
+{
+    m_animation->SetRotation(t_rotation);
+    m_animation->Draw();
+}
+
+void DisplayGraphics::DrawBTIcon()
+{
+    m_tftDisplay.drawBitmap(100,200,BTICON,91,117,TEXT_COLOR);
 }
 
 void DisplayGraphics::CheckTouch()
@@ -58,7 +81,6 @@ void DisplayGraphics::CheckTouch()
     pinMode(XM, OUTPUT);
     if (p.z > MINPRESSURE && p.z < MAXPRESSURE)
     {
-        Serial.println(p.y);
         int y = 320 - (p.x - 690) / 10;
         int x = (p.y - 760) / 12.27;
 

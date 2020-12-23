@@ -20,10 +20,7 @@ Button::Button(TFT_eSPI *t_tft, TouchScreen *t_ts,
     m_ts = t_ts;
     m_textX = (max(m_x1, max(m_x2, m_x3)) - min(m_x1, min(m_x2, m_x3))) / 2 + min(m_x1, min(m_x2, m_x3)) + t_textXOffset;
     m_textY = (max(m_y1, max(m_y2, m_y3)) - min(m_y1, min(m_y2, m_y3))) / 2 + min(m_y1, min(m_y2, m_y3)) + t_textYOffset;
-    t_tft->setTextColor(TFT_BLACK, TFT_CYAN);
-    t_tft->setFreeFont(FSS24);
-    t_tft->fillTriangle(t_x1, t_y1, t_x2, t_y2, t_x3, t_y3, TFT_CYAN);
-    t_tft->drawCentreString(m_text, m_textX, m_textY, GFXFF);
+    DrawNormal();
 };
 
 void Button::SetCallback(std::function<void()> t_callback)
@@ -37,10 +34,7 @@ void Button::CheckPoint(int t_x, int t_y)
         if (!m_pressed)
         {
             m_callback();
-            m_tft->setFreeFont(FSS24);
-            m_tft->setTextColor(TFT_BLACK, TFT_DARKGREY);
-            m_tft->fillTriangle(m_x1, m_y1, m_x2, m_y2, m_x3, m_y3, TFT_DARKGREY);
-            m_tft->drawCentreString(m_text, m_textX, m_textY, GFXFF);
+            DrawPressed();
             m_pressed = true;
         }
     }
@@ -48,10 +42,7 @@ void Button::CheckPoint(int t_x, int t_y)
     {
         if (m_pressed)
         {
-            m_tft->setTextColor(TFT_BLACK, TFT_CYAN);
-            m_tft->setFreeFont(FSS24);
-            m_tft->fillTriangle(m_x1, m_y1, m_x2, m_y2, m_x3, m_y3, TFT_CYAN);
-            m_tft->drawCentreString(m_text, m_textX, m_textY, GFXFF);
+            DrawNormal();
             m_pressed = false;
         }
     }
@@ -86,4 +77,23 @@ bool Button::IsInside(int x, int y)
 
     /* Check if sum of A1, A2 and A3 is same as A */
     return (A == A1 + A2 + A3);
+}
+
+void Button::DrawNormal()
+{
+    m_tft->fillTriangle(m_x1, m_y1 + 1, m_x2 + 1, m_y2 - 1, m_x3 - 1, m_y3 - 1, BTN_COLOR);
+    m_tft->drawTriangle(m_x1, m_y1, m_x2, m_y2, m_x3, m_y3, BTN_BORDER);
+    m_tft->setFreeFont(FSSB18);
+    m_tft->setTextColor(TFT_BLACK, BTN_COLOR);
+    m_tft->drawCentreString(m_text, m_textX, m_textY, GFXFF);
+}
+
+void Button::DrawPressed()
+{
+
+    m_tft->fillTriangle(m_x1 + 1, m_y1 + 1, m_x2, m_y2 - 1, m_x3 - 1, m_y3 + 1, BTN_PRESSED);
+    m_tft->drawTriangle(m_x1, m_y1, m_x2, m_y2, m_x3, m_y3, BTN_BORDER);
+    m_tft->setFreeFont(FSSB18);
+    m_tft->setTextColor(TFT_BLACK, BTN_PRESSED);
+    m_tft->drawCentreString(m_text, m_textX, m_textY, GFXFF);
 }

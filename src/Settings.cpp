@@ -1,7 +1,7 @@
 #include <Settings.h>
 #include <ArduinoJson.h>
 
-Settings* Settings::m_instance = nullptr;
+Settings *Settings::m_instance = nullptr;
 Settings::Settings()
 {
     CreateConfigFileIfNotExist();
@@ -10,6 +10,7 @@ Settings::Settings()
 
 bool Settings::ReadSettings()
 {
+    //portENTER_CRITICAL_ISR(m_mutex);
     File tmpFile = SPIFFS.open("/Settings.json", FILE_READ);
     String content = tmpFile.readString();
 
@@ -28,16 +29,14 @@ bool Settings::ReadSettings()
     m_readInterval = homeObj["ReadInterval"];
     m_sensorAddress = homeObj["SensorAddress"].as<String>();
     tmpFile.close();
+    //portEXIT_CRITICAL_ISR(m_mutex);
 
     return true;
 }
 
 bool Settings::SaveSettings(bool t_override) const
 {
-    if (t_override)
-    {
-        SPIFFS.remove("/Settings.json");
-    }
+    //portENTER_CRITICAL_ISR(m_mutex);
     File tmpFile = SPIFFS.open("/Settings.json", FILE_WRITE);
     DynamicJsonDocument settingsJson(512);
 
@@ -55,6 +54,7 @@ bool Settings::SaveSettings(bool t_override) const
 
     serializeJson(settingsJson, tmpFile);
     tmpFile.close();
+    //portEXIT_CRITICAL_ISR(m_mutex);
 
     return true;
 }
@@ -73,9 +73,9 @@ void Settings::CreateConfigFileIfNotExist()
     }
 }
 
-Settings* Settings::GetInstance()
+Settings *Settings::GetInstance()
 {
-    if(!m_instance)
+    if (!m_instance)
     {
         m_instance = new Settings;
     }
