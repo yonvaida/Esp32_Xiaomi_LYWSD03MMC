@@ -9,4 +9,5 @@ void ClientCallback::onConnect(BLEClient *pclient)
  void ClientCallback::onDisconnect(BLEClient *pclient) 
  {
      Serial.println("Client disconnected \n");
+     *m_reading = false;
  };

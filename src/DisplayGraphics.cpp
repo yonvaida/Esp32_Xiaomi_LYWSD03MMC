@@ -69,9 +69,9 @@ void DisplayGraphics::DrawAnimation(bool t_rotation)
     m_animation->Draw();
 }
 
-void DisplayGraphics::DrawBTIcon()
+void DisplayGraphics::DrawBTIcon(bool t_reading)
 {
-    m_tftDisplay.drawBitmap(100,200,BTICON,91,117,TEXT_COLOR);
+    m_tftDisplay.drawBitmap(170, 250, BTICON, 35, 50, t_reading ? TEXT_COLOR : BACKGROUND);
 }
 
 void DisplayGraphics::CheckTouch()

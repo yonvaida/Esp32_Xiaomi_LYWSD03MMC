@@ -20,13 +20,13 @@ std::unique_ptr<DisplayGraphics> m_graphics;
 hw_timer_t *timer = NULL;
 portMUX_TYPE timerMux = portMUX_INITIALIZER_UNLOCKED;
 bool pompWorking = true;
-bool bluetoothReading = true;
+bool bluetoothReading = false;
 unsigned long startTimer;
 
 void initBluetooth()
 {
   m_reader = new BluetoothReader(BLEUUID("ebe0ccb0-7a0a-4b0c-8a1a-6ff2997da3a6"), Settings::GetInstance()->GetSensorAddress().c_str());
-  m_reader->SetCallback(new ClientCallback());
+  m_reader->SetCallback(new ClientCallback(&bluetoothReading));
 }
 
 void Task1code(void *pvParameters)
@@ -76,6 +76,7 @@ void Task1code(void *pvParameters)
       sensorAddres = Settings::GetInstance()->GetSensorAddress();
       portEXIT_CRITICAL_ISR(&timerMux);
     }
+    Serial.println(bluetoothReading);
     delay(1000);
   }
 }
@@ -110,20 +111,13 @@ void loop()
   {
     m_graphics->DrawAnimation(true);
     m_graphics->DrawBTAddress();
-    m_graphics->DrawBTIcon();
     portENTER_CRITICAL(&timerMux);
     pompWorking = false;
     portEXIT_CRITICAL(&timerMux);
   }
 
-  //   if (bluetoothReading)
-  // {
-  //   m_graphics->(true);
-  //   m_graphics->DrawBTAddress();
-  //   portENTER_CRITICAL(&timerMux);
-  //   bluetoothReading = false;
-  //   portEXIT_CRITICAL(&timerMux);
-  // }
+  m_graphics->DrawBTIcon(bluetoothReading);
+
   m_graphics->DrawCurrentTemp();
   m_graphics->CheckTouch();
 }

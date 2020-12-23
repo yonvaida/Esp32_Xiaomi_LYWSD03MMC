@@ -29,7 +29,7 @@ public:
     void DrawBTAddress();
     void CheckTouch();
     void DrawAnimation(bool t_moving);
-    void DrawBTIcon();
+    void DrawBTIcon(bool t_reading);
 private:
     TFT_eSPI m_tftDisplay;
     std::unique_ptr<TouchScreen> m_touch;
